@@ -7,56 +7,62 @@ tau, same as ra | set as 1 maybe?
 
 data {
     int<lower=1> T;
+    int<lower=1> N;
+    int<lower=1> Tsubj[N];
 
     // Risk Aversion Part
-    int<lower=1, upper=3> RiskType[T];
-    int<lower=1, upper=3> RewardType[T];
-    int<lower=0, upper=1> ResponseType[T];
+    int<lower=0, upper=3> RiskType[N,T];
+    int<lower=0, upper=3> RewardType[N,T];
+    int<lower=0, upper=1> ResponseType[N,T];
 
     // Reinforcement Learning part
     // real<lower=0> Reward[T];
-    int<lower=0, upper=1> Shock[T];
+    int<lower=0, upper=1> Shock[N,T];
 }
 transformed data {
 }
 parameters {
-    real<lower=0, upper=2> RiskAversion;
-    real<lower=0, upper=2> PainAvoidance;
-    real<lower=0, upper=10> tau;
+    vector<lower=0, upper=2>[N] RiskAversion;
+    vector<lower=0, upper=2>[N] PainAvoidance;
+    vector<lower=0, upper=10>[N] tau;
 }
 transformed parameters {
 }
 model {
-    // counting shocks
-    int n_shocks = 0; //remember to reset for each sequence of trial / subject
-    //
+    // priors
     RiskAversion    ~ uniform(0, 2);
     PainAvoidance ~ uniform(0, 2);
     tau    ~ uniform(0, 10);
 
+    // model calculation
+    for (i in 1:N){
+    // counting shocks
+    int n_shocks = 0; //remember to reset for each sequence of trial / subject
 
-    for (t in 1:T) {
+        for (t in 1:Tsubj[i]) {
 
-        real evSafe;
-        real evGamble;
-        real pGamble;
+            // Risk Aversion
+            real evSafe;
+            real evGamble;
+            real pGamble;
 
-        evSafe   = pow(0.01, RiskAversion);
+            evSafe   = pow(0.01, RiskAversion[i]);
 
-        if (RiskType[t] == 1)
-            evGamble = 0.9 * (pow(RewardType[t], RiskAversion)) + 0.1 * (pow(RewardType[t], RiskAversion) - PainAvoidance * n_shocks);
-        else if (RiskType[t] == 2)
-            evGamble = 0.5 * (pow(RewardType[t], RiskAversion)) + 0.5 * (pow(RewardType[t], RiskAversion) - PainAvoidance * n_shocks);
-        else
-            evGamble = 0.1 * (pow(RewardType[t], RiskAversion)) + 0.9 * (pow(RewardType[t], RiskAversion) - PainAvoidance * n_shocks);
+            if (RiskType[i,t] == 1)
+                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.1 * ( PainAvoidance[i] * n_shocks );
+            else if (RiskType[i,t] == 2)
+                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.5 * ( PainAvoidance[i] * n_shocks );
+            else
+                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.9 * ( PainAvoidance[i] * n_shocks );
 
-        pGamble  = inv_logit(tau * (evGamble - evSafe));
+            pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 
-        ResponseType[t] ~ bernoulli(pGamble);
+            ResponseType[i,t] ~ bernoulli(pGamble);
 
-        // update shocks
-        if(ResponseType[t] == 1)
-            n_shocks += Shock[t];
+            // update shocks, RL?
+            if(ResponseType[i,t] == 1)
+                n_shocks += Shock[i,t];
+        }
     }
 }
 /*

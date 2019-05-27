@@ -34,16 +34,13 @@ ResponseType - 0|safe, 1|risky, NaN|no record
 "
 
 # data frames for fill-in
+# -1 will be values for not used fields |  NaN
 Tsubj = array(0, c(N))
 RewardType = array(0, c(N,T))
 RiskType = array(0, c(N,T))
 ResponseType = array(0, c(N,T))
 Shock = array(0, c(N,T))
 
-print("subset")
-print(length(subset(dat_1, SubjID == 1)[,1]))
-print("riskty")
-print(length(RiskType[1,]))
 #fill in with data
 for (n in 1:N){
     subjdat = subset(dat_1, SubjID == allSubjs[n])
@@ -67,19 +64,17 @@ for (n in 1:N){
 dataList <- list(
     N       = N,
     T       = T, #108
-    Tsubj   = Tsubj,
+    Tsubj   = Tsubj, # <= 108
     RiskType = RiskType,
     RewardType = RewardType,
     ResponseType =  ResponseType,
     Shock = Shock
 )
 
-
-
-# output = stan("./model_1.stan",
-#           data = dataList,
-#           pars = c("RiskAversion", "PainAvoidance", "tau"),
-#           iter = 4000, warmup=2000, chains=4, cores=4)
+output = stan("./model_1.stan",
+          data = dataList,
+          pars = c("RiskAversion", "PainAvoidance", "tau"),
+          iter = 2000, warmup=1000, chains=1, cores=1)
 # # run!
 # if (!file.exists("stanfit.rds")){
 #     print("fitting stan model")
@@ -92,9 +87,9 @@ dataList <- list(
 #     print("recovering stan model")
 #     output = readRDS("stanfit.rds")
 # }
-#
-# pdf("traceplot.pdf")
-# traceplot(output)
-# pdf("posteriors.pdf")
-# stan_dens(output)
-#
+
+pdf("traceplot.pdf")
+traceplot(output)
+pdf("posteriors.pdf")
+stan_dens(output)
+
