@@ -1,0 +1,102 @@
+{
+  "onset": {
+    "Description": "Onset of trial",
+    "Units": "seconds"
+  },
+  "duration": {
+    "Description": "Length of trial",
+    "Units": "seconds"
+  },
+  "Trial": {
+    "Description": "Trial number"
+  },
+  "RiskType": {
+    "Description": "Risk level of trial",
+    "Levels": {
+      "1": "Low risk (10% likelihood of shock)",
+      "2": "Medium risk (50% likelihood of shock)",
+      "3": "High risk (90% likelihood of shock)"
+    }
+  },
+  "TimeType": {
+    "Description": "Phase of trial",
+    "Levels": {
+      "1": "Early trials (1-36)",
+      "2": "Middle trials (37-72)",
+      "3": "Late trials (73-108)"
+      }
+  },
+  "RewardType": {
+    "Description": "Reward level of trial",
+    "Levels": {
+      "1": "Low reward ($0.05 - $0.34)",
+      "2": "Medium reward ($0.35 - $0.65)",
+      "3": "High reward ($0.65 - $0.95)"
+    }
+  },
+  "Reward": {
+    "Description": "Monetary reward for trial",
+    "Units": "US dollars"
+  },
+  "Shock": {
+    "Description": "If risky option selected, then shock is delivered",
+    "Levels": {
+        "1": "True",
+        "0": "False"
+      }
+  },
+  "ITI": {
+    "Description": "Intertrial interval (corresponds to fixation cross before onset of trial)",
+    "Units": "seconds"
+  },
+  "Offset": {
+    "Description": "Whether trial begins halfway through fMRI acquisition (i.e. half-TR)",
+    "Levels": {
+      "1": "Trial starts in the middle of scanner acquisition",
+      "0": "Trial starts at start of scanner acquisition"
+    }
+  },
+  "LeftKey": {
+    "Description": "Whether risky option is presented on left or right side of screen",
+    "Levels": {
+      "1": "Risky option presented on left side",
+      "0": "Risky option presented on right side"
+    }
+  },
+  "FixOnset": {
+    "Description": "Onset time of fixation cross",
+    "Units": "seconds"
+  },
+  "RiskOnset": {
+    "Description": "Onset time of risk bar",
+    "Units": "seconds"
+  },
+  "RewardOnset": {
+    "Description": "Onset time of reward presentation / start of response window",
+    "Units": "seconds"
+  },
+  "ResponseType": {
+    "Description": "Participant choice",
+    "Levels": {
+      "1": "Select risky option",
+      "0": "Select safe option",
+      "n/a": "Missing repsonse"
+    }
+  },
+  "ResponseOnset": {
+    "Description": "Onset time of response",
+    "Units": "seconds"
+  },
+  "ResponseTime": {
+    "Description": "Length of response time (relative to onset of rewards)",
+    "Units": "seconds"
+  },
+  "ResultOnset": {
+    "Description": "Onset time of trial outcome",
+    "Units": "seconds"
+  },
+  "ShockOnset": {
+    "Description": "Onset time of shock (if applicable)",
+    "Units": "seconds"
+  }
+}

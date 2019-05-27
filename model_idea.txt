@@ -1,0 +1,8 @@
+RA-model for the most part.
+
+pain:
+start at some number > 0
+reducing to zero by each shock, by some ratio (another parameter)
+
+PainAcceptance: lamnda / N_shocks or something
+
