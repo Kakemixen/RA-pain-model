@@ -71,7 +71,7 @@ dataList <- list(
     Shock = Shock
 )
 
-output = stan("./model_1.stan",
+output = stan("./models/model_log_individual.stan",
           data = dataList,
           pars = c("RiskAversion", "PainAvoidance", "tau"),
           iter = 2000, warmup=1000, chains=1, cores=1)
@@ -89,7 +89,11 @@ output = stan("./model_1.stan",
 # }
 
 pdf("traceplot.pdf")
-traceplot(output)
+traceplot(output, pars=c("RiskAversion"))
+traceplot(output, pars=c("PainAvoidance"))
+traceplot(output, pars=c("tau"))
 pdf("posteriors.pdf")
-stan_dens(output)
+stan_dens(output, pars=c("RiskAversion"))
+stan_dens(output, pars=c("PainAvoidance"))
+stan_dens(output, pars=c("tau"))
 
