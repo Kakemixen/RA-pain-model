@@ -49,11 +49,11 @@ model {
             evSafe   = pow(0.01, RiskAversion[i]);
 
             if (RiskType[i,t] == 1)
-                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.1 * log( PainAvoidance[i] * n_shocks + 1);
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.1 * log( PainAvoidance[i] * n_shocks + 1);
             else if (RiskType[i,t] == 2)
-                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.5 * log( PainAvoidance[i] * n_shocks + 1);
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.5 * log( PainAvoidance[i] * n_shocks + 1);
             else
-                evGamble = pow(RewardType[i,t], RiskAversion[i]) - 0.9 * log( PainAvoidance[i] * n_shocks + 1);
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.9 * log( PainAvoidance[i] * n_shocks + 1);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 

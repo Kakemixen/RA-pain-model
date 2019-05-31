@@ -4,6 +4,7 @@ pain avoidance (dependent on total previous pain)
 subjective value
 tau, same as ra | set as 1 maybe?
 */
+
 data {
     int<lower=1> T;
     int<lower=1> N;
@@ -16,22 +17,24 @@ data {
 
     // Reinforcement Learning part
     // real<lower=0> Reward[T];
-    int<lower=0, upper=1> Shock[N,T]; //included to make switching between models easier
+    int<lower=0, upper=1> Shock[N,T];
 }
 transformed data {
 }
 parameters {
-    vector<lower=0, upper=2>[N] RiskAversion;
-    vector<lower=0, upper=10>[N] PainAvoidance;
-    vector<lower=0, upper=10>[N] tau;
+    vector<lower=0, upper=3>[N] RiskAversion;
+    vector<lower=0, upper=3>[N] PainAvoidance;
+    vector<lower=0, upper=3>[N] PainRetention;
+    vector<lower=0, upper=5>[N] tau;
 }
 transformed parameters {
 }
 model {
     // priors
-    RiskAversion    ~ uniform(0, 2);
-    PainAvoidance ~ uniform(0, 10);
-    tau    ~ uniform(0, 10);
+    RiskAversion    ~ uniform(0, 3);
+    PainAvoidance ~ uniform(0, 3);
+    PainRetention ~ uniform(0, 3);
+    tau    ~ uniform(0, 5);
 
     // model calculation
     for (i in 1:N){
@@ -48,16 +51,19 @@ model {
             evSafe   = pow(0.01, RiskAversion[i]);
 
             if (RiskType[i,t] == 1)
-                evGamble = pow(RewardType[i,t]*0.3,3 RiskAversion[i]) - 0.1 * ( PainAvoidance[i] );
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.1 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
             else if (RiskType[i,t] == 2)
-                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.5 * ( PainAvoidance[i] );
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.5 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
             else
-                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.9 * ( PainAvoidance[i] );
+                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.9 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 
             ResponseType[i,t] ~ bernoulli(pGamble);
 
+            // update shocks, RL?
+            if(ResponseType[i,t] == 1)
+                n_shocks += Shock[i,t];
         }
     }
 }
