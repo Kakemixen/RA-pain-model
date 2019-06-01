@@ -22,19 +22,34 @@ data {
 transformed data {
 }
 parameters {
-    vector<lower=0, upper=3>[N] RiskAversion;
-    vector<lower=0, upper=3>[N] PainAvoidance;
-    vector<lower=0, upper=3>[N] PainRetention;
-    vector<lower=0, upper=5>[N] tau;
+    //individ raw
+    vector[N] RiskAversion_pr;
+    vector[N] PainRetention_pr;
+    matrix[N, 3] PainAvoidance_pr;
+    vector[N] tau_pr;
 }
 transformed parameters {
+    vector<lower=0, upper=3>[N] RiskAversion;
+    vector<lower=0, upper=3>[N] PainRetention;
+    matrix<lower=0, upper=3>[N, 3] PainAvoidance;
+    vector<lower=0, upper=5>[N] tau;
+
+    for(i in 1:N){
+        RiskAversion[i] = Phi_approx( RiskAversion_pr[i] ) * 3;
+        PainRetention[i] = Phi_approx( PainRetention_pr[i] ) * 3;
+        //Pain avoidance is matrix
+        for (j in 1:3){
+            PainAvoidance[i,j] = Phi_approx( PainAvoidance_pr[i,j] ) * 3;
+        }
+        tau[i] = Phi_approx( tau_pr[i] ) * 5;
+    }
 }
 model {
     // priors
-    RiskAversion    ~ uniform(0, 3);
-    PainAvoidance ~ uniform(0, 3);
-    PainRetention ~ uniform(0, 3);
-    tau    ~ uniform(0, 5);
+    RiskAversion_pr    ~ normal(0, 1);
+    PainRetention_pr   ~ normal(0, 1);
+    to_vector(PainAvoidance_pr) ~ normal(0, 1);
+    tau_pr    ~ normal(0, 1);
 
     // model calculation
     for (i in 1:N){
@@ -50,12 +65,7 @@ model {
 
             evSafe   = pow(0.01, RiskAversion[i]);
 
-            if (RiskType[i,t] == 1)
-                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.1 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
-            else if (RiskType[i,t] == 2)
-                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.5 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
-            else
-                evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - 0.9 * PainAvoidance[i] * pow(n_shocks, PainRetention[i]);
+            evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - PainAvoidance[i,RiskType[i,t]] * exp(-n_shocks * PainRetention[i]);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 
@@ -67,23 +77,4 @@ model {
         }
     }
 }
-/*
-generated quantities{
-    // For posterior predictive check
-    real y_pred[T];
-
-    for (t in 1:T) {
-        real evSafe;
-        real evGamble;
-        real pGamble;
-
-        evSafe     = pow(cert[t], RiskAversion);
-        evGamble   = 0.5 * (pow(gain[t], RiskAversion) + PainAvoidance * pow(loss[t], RiskAversion));
-        pGamble    = inv_logit(tau * (evGamble - evSafe));
-
-        // generate posterior prediction for current trial
-        y_pred[t] = bernoulli_rng(pGamble);
-    }
-}
-*/
 

@@ -10,6 +10,29 @@ set.seed(21111996) # such eggs of easter ^^
 # source HDIofMCMC.R to calculate HDI
 source("./HDIofMCMC.R")
 
+
+### parameters for running
+available_names = "
+const_i
+const_h
+
+lin_i
+lin_h
+
+log_i
+log_h
+
+exp_i
+
+pow_i
+
+"
+
+model_name = "const_i"
+
+
+
+
 # read the data file
 dat_1 = read.table("./data/AllSubjectsProcessed.tsv", header=T, sep="\t")
 
@@ -71,10 +94,18 @@ dataList <- list(
     Shock = Shock
 )
 
-output = stan("./models/model_log_individual.stan",
+# output = stan("./models/model_log_hierarchical.stan",
+output = stan(paste("./models/", model_name, ".stan", sep=""),
           data = dataList,
-          pars = c("RiskAversion", "PainAvoidance", "tau"),
+          pars = c("RiskAversion",
+                   "PainAvoidance",
+                   # "PainRetention",
+                   # "mu_p",
+                   # "sigma_p",
+                   # "hyper",
+                   "tau"),
           iter = 2000, warmup=1000, chains=1, cores=1)
+print(output)
 # # run!
 # if (!file.exists("stanfit.rds")){
 #     print("fitting stan model")
@@ -88,12 +119,19 @@ output = stan("./models/model_log_individual.stan",
 #     output = readRDS("stanfit.rds")
 # }
 
-pdf("traceplot.pdf")
+pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
 traceplot(output, pars=c("RiskAversion"))
 traceplot(output, pars=c("PainAvoidance"))
+# traceplot(output, pars=c("hyper"))
+# traceplot(output, pars=c("PainRetention"))
 traceplot(output, pars=c("tau"))
-pdf("posteriors.pdf")
+pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
 stan_dens(output, pars=c("RiskAversion"))
-stan_dens(output, pars=c("PainAvoidance"))
+stan_plot(output, pars=c("PainAvoidance"))
+# stan_dens(output, pars=c("hyper"))
+# stan_dens(output, pars=c("PainRetention"))
 stan_dens(output, pars=c("tau"))
 
+# params = rstan::extract(output)
+# RA_mean = apply(params$RiskAversion, 2, mean)
+# PA_mean = apply(params$PainAvoidance, 2, mean)
