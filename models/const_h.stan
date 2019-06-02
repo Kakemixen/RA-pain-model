@@ -32,7 +32,7 @@ parameters {
 transformed parameters {
     vector<lower=0, upper=5>[N] RiskAversion;
     matrix<lower=0, upper=5>[N, 3] PainAvoidance;
-    vector<lower=0, upper=10>[N] tau;
+    vector<lower=0, upper=20>[N] tau;
 
     for(i in 1:N){
         RiskAversion[i] = Phi_approx( mu_p[1] + sigma_p[1] * RiskAversion_pr[i] ) * 5;
@@ -67,7 +67,7 @@ model {
 
             evSafe   = pow(0.01, RiskAversion[i]);
 
-            evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 0.1);
+            evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 1);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 
@@ -80,9 +80,45 @@ model {
     }
 }
 generated quantities {
-    vector[5] hyper;
+    real mu_RiskAversion;
+    vector[3] mu_PainAvoidance;
+    real mu_tau;
 
-    hyper = Phi_approx(mu_p);
+    // For posterior predictive check
+    real PredictedResponse[N, T];
+    real log_lik[N];
 
+    mu_RiskAversion = Phi_approx(mu_p[1]) * 5;
+    mu_PainAvoidance = Phi_approx(mu_p[2:4]) * 5;
+    mu_tau = Phi_approx(mu_p[5]) * 5;
+
+
+
+
+    // Set all posterior predictions to 0 (avoids NULL values)
+    for (i in 1:N) {
+        for (t in 1:T) {
+            PredictedResponse[i, t] = -1;
+        }
+    }
+
+    { // local section, this saves time and space
+        for (i in 1:N) {
+            log_lik[i] = 0;
+            for (t in 1:Tsubj[i]) {
+                real evSafe;    // evSafe, evGamble, pGamble can be a scalar to save memory and increase speed.
+                real evGamble;  // they are left as arrays as an example for RL models.
+                real pGamble;
+
+                evSafe     = pow(0.01, RiskAversion[i]);
+                evGamble   = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 1);
+                pGamble    = inv_logit(tau[i] * (evGamble - evSafe));
+                log_lik[i] += bernoulli_lpmf(ResponseType[i, t] | pGamble);
+
+                // generate posterior prediction for current trial
+                PredictedResponse[i, t] = bernoulli_rng(pGamble);
+            }
+        }
+    }
 }
 

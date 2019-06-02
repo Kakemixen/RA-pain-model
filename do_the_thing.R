@@ -15,6 +15,7 @@ source("./HDIofMCMC.R")
 available_names = "
 const_i
 const_h
+const_h_noT
 
 lin_i
 lin_h
@@ -28,7 +29,14 @@ pow_i
 
 "
 
-model_name = "const_i"
+model_name = "const_h_noT"
+
+is_h = TRUE
+has_ret = FALSE #doesnt affect atm
+has_tau = FALSE
+
+iters = 2000
+warmups = 1000
 
 
 
@@ -75,15 +83,6 @@ for (n in 1:N){
     Shock[n,1:trials] = subjdat$Shock
 }
 
-    #  # Risk Aversion Part
-    # int<lower=1, upper=3> RiskType[T];
-    # int<lower=1, upper=3> RewardType[T];
-    # int<lower=0, upper=1> ResponseType[T];
-    #
-    # # Reinforcement Learning part
-    # # real<lower=0> Reward[T];
-    # int<lower=0, upper=1> Shock[T];
-    #
 dataList <- list(
     N       = N,
     T       = T, #108
@@ -94,44 +93,92 @@ dataList <- list(
     Shock = Shock
 )
 
-# output = stan("./models/model_log_hierarchical.stan",
-output = stan(paste("./models/", model_name, ".stan", sep=""),
-          data = dataList,
-          pars = c("RiskAversion",
-                   "PainAvoidance",
-                   # "PainRetention",
-                   # "mu_p",
-                   # "sigma_p",
-                   # "hyper",
-                   "tau"),
-          iter = 2000, warmup=1000, chains=1, cores=1)
-print(output)
-# # run!
-# if (!file.exists("stanfit.rds")){
-#     print("fitting stan model")
-#     output = stan("./model_1.stan",
-#               data = dataList,
-#               pars = c("RiskAversion", "PainAcceptance", "tau"),
-#               iter = 2000, warmup=1000, chains=4, cores=4)
-#     saveRDS(output, "stanfit.rds")
-# } else {
-#     print("recovering stan model")
-#     output = readRDS("stanfit.rds")
-# }
 
+# get pars vector
+parameters = c("RiskAversion","PainAvoidance","log_lik","PredictedResponse")
+if(has_tau){
+      parameters = append(parameters, c("tau"))
+}
+if(is_h){
+    parameters = append(parameters, c("mu_p", "sigma_p", "mu_RiskAversion","mu_PainAvoidance"))
+    if(has_tau){
+        parameters =append(parameters, c("mu_tau"))
+    }
+}
+print("Parameters to fit")
+print(parameters)
+
+# run!
+if (!file.exists(paste(model_name, "stanfit.rds",sep="_"))){
+    print("fitting stan model")
+    output = stan(paste("./models/", model_name, ".stan", sep=""),
+          data = dataList,
+          pars = parameters,
+          iter = iters, warmup=warmups, chains=1, cores=1)
+    saveRDS(output, paste(model_name, "stanfit.rds",sep="_"))
+} else {
+    print("recovering stan model")
+    output = readRDS(paste(model_name, "stanfit.rds",sep="_"))
+}
+
+
+## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
 traceplot(output, pars=c("RiskAversion"))
 traceplot(output, pars=c("PainAvoidance"))
-# traceplot(output, pars=c("hyper"))
-# traceplot(output, pars=c("PainRetention"))
-traceplot(output, pars=c("tau"))
-pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
-stan_dens(output, pars=c("RiskAversion"))
-stan_plot(output, pars=c("PainAvoidance"))
-# stan_dens(output, pars=c("hyper"))
-# stan_dens(output, pars=c("PainRetention"))
-stan_dens(output, pars=c("tau"))
+# traceplot(output, pars=c("tau"))
+# traceplot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 
-# params = rstan::extract(output)
-# RA_mean = apply(params$RiskAversion, 2, mean)
-# PA_mean = apply(params$PainAvoidance, 2, mean)
+
+# posterior plots
+pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
+stan_plot(output, pars=c("RiskAversion"))
+stan_plot(output, pars=c("PainAvoidance"))
+# plot(density(extracted$PainAvoidance[,,3]), col="red")
+# stan_dens(output, pars=c("tau"))
+# stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
+# stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
+stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
+stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
+
+
+params = extract(output)
+pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
+
+# Set up the vectors
+true_gambling <- c("tSafe", "tGamble")
+prediction <- c("pSafe","pGamble")
+
+total_values <- c(0,0,0,0)
+
+for(n in 1:N){
+             #true: S, G  pred:
+    pred_values <- c(0,0, # S
+                     0,0) # G
+    for(i in 1:Tsubj[n]){
+        yPred <- params$PredictedResponse[iters-warmups,n,i]
+        yTrue <- ResponseType[n,i]
+        index = yPred*2 + yTrue + 1
+        pred_values[index] = pred_values[index] + 1
+    }
+    total_values = total_values + pred_values
+
+    # Create the data frame
+    df <- expand.grid(true_gambling, prediction)
+    df$value <- pred_values
+
+    #Plot the Data
+    g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("green", "red", "red", "green")) +
+        theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("Subject:",n)) +
+        scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
+    print(g)
+}
+#Plot the Data for all subjects together
+df <- expand.grid(true_gambling, prediction)
+df$value <- total_values
+g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("green", "red", "red", "green")) +
+    theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("All Subjects")) +
+    scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
+print(g)
+
+# pdf(paste("./plots/", model_name, "_likelihood.pdf", sep=""))

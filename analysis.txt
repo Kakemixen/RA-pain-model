@@ -1,0 +1,34 @@
+ - const_h
+RiskAversion are different between candidates
+hyperparameters for PainAvoidance increases with risk, as expected.
+can also see this patters looking at the individual plots
+tau is maxed out, I'm assuming this ib bæd.
+
+PPC: 2852+608 correct, 252+237 wrong -> 3460/(3460+489) = 0.876 ratio correct
+also predicts subjects that did not change bahaviour well
+(3, 12, 15, 19, 23)
+
+At this point it is worth noting that most subjects have a strong preference for gambling than not, what parameterscan reflect this?
+
+ - cont_h_noT
+PainAvoidance has a weird thinng with being predicted as zero for low/med risk
+then very high uncertainty for high risk.
+RiskAversion is predicted as more or less the same for each candidate.
+
+PPC: 1882+449 correct, 937+411 wrong -> 0.633 ration correct
+
+ - const_i
+Not good model, half of true gambles are predicted as safe bets.
+Seems to predict safe bets well, most likely because the model is inclined to predict safe
+
+plots:
+RiskAversion seems very similar between subjects
+most PainAvoidance is between 0-2 with some up to 4
+Good spread, but doesn't seem to help model predict well
+Tau does not seem to reveal any patterns
+
+PPC: 1342 + 819 correct, 1477 + 41 wrong -> 0.587 ratio correct
+
+ - log_h
+
+ - log_i
