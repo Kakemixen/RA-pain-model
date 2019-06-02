@@ -29,14 +29,17 @@ pow_i
 
 "
 
-model_name = "const_h_noT"
+model_name = "lin_h"
+print("model")
+print(model_name)
 
 is_h = TRUE
 has_ret = FALSE #doesnt affect atm
-has_tau = FALSE
+has_tau = TRUE
 
 iters = 2000
 warmups = 1000
+chains = 1
 
 
 
@@ -109,16 +112,16 @@ print("Parameters to fit")
 print(parameters)
 
 # run!
-if (!file.exists(paste(model_name, "stanfit.rds",sep="_"))){
+if (!file.exists(paste("./stanfits/", model_name, ".rds",sep=""))){
     print("fitting stan model")
     output = stan(paste("./models/", model_name, ".stan", sep=""),
           data = dataList,
           pars = parameters,
-          iter = iters, warmup=warmups, chains=1, cores=1)
-    saveRDS(output, paste(model_name, "stanfit.rds",sep="_"))
+          iter = iters, warmup=warmups, chains=chains, cores=chains)
+    saveRDS(output, paste("./stanfits/", model_name, ".rds",sep=""))
 } else {
     print("recovering stan model")
-    output = readRDS(paste(model_name, "stanfit.rds",sep="_"))
+    output = readRDS(paste("./stanfits/", model_name, ".rds",sep=""))
 }
 
 
@@ -126,8 +129,8 @@ if (!file.exists(paste(model_name, "stanfit.rds",sep="_"))){
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
 traceplot(output, pars=c("RiskAversion"))
 traceplot(output, pars=c("PainAvoidance"))
-# traceplot(output, pars=c("tau"))
-# traceplot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
+traceplot(output, pars=c("tau"))
+traceplot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 
 
 # posterior plots
@@ -135,11 +138,11 @@ pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
 stan_plot(output, pars=c("RiskAversion"))
 stan_plot(output, pars=c("PainAvoidance"))
 # plot(density(extracted$PainAvoidance[,,3]), col="red")
-# stan_dens(output, pars=c("tau"))
-# stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
-# stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
-stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
-stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
+stan_plot(output, pars=c("tau"))
+stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
+stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
+# stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
+# stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance"))
 
 
 params = extract(output)
@@ -181,4 +184,4 @@ g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("gre
     scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
 print(g)
 
-# pdf(paste("./plots/", model_name, "_likelihood.pdf", sep=""))
+# pfd(paste("./plots/", model_name, "_likelihood.pdf", sep=""))

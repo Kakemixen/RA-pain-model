@@ -40,7 +40,7 @@ transformed parameters {
         for (j in 1:3){
             PainAvoidance[i,j] = Phi_approx( mu_p[j+1] + sigma_p[j+1] * PainAvoidance_pr[i,j] ) * 5;
         }
-        tau[i] = Phi_approx( mu_p[5] + sigma_p[5] * tau_pr[i] ) * 10;
+        tau[i] = Phi_approx( mu_p[5] + sigma_p[5] * tau_pr[i] ) * 20;
     }
 }
 model {
@@ -90,7 +90,7 @@ generated quantities {
 
     mu_RiskAversion = Phi_approx(mu_p[1]) * 5;
     mu_PainAvoidance = Phi_approx(mu_p[2:4]) * 5;
-    mu_tau = Phi_approx(mu_p[5]) * 5;
+    mu_tau = Phi_approx(mu_p[5]) * 20;
 
 
 

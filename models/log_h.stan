@@ -34,7 +34,7 @@ parameters {
 transformed parameters {
     vector<lower=0, upper=5>[N] RiskAversion;
     matrix<lower=0, upper=5>[N, 3] PainAvoidance;
-    vector<lower=0, upper=10>[N] tau;
+    vector<lower=0, upper=20>[N] tau;
 
     for(i in 1:N){
         RiskAversion[i] = Phi_approx( mu_p[1] + sigma_p[1] * RiskAversion_pr[i] ) * 5;
@@ -42,7 +42,7 @@ transformed parameters {
         for (j in 1:3){
             PainAvoidance[i,j] = Phi_approx( mu_p[j+1] + sigma_p[j+1] * PainAvoidance_pr[i,j] ) * 5;
         }
-        tau[i] = Phi_approx( mu_p[5] + sigma_p[5] * tau_pr[i] ) * 10;
+        tau[i] = Phi_approx( mu_p[5] + sigma_p[5] * tau_pr[i] ) * 20;
     }
 }
 model {
@@ -69,7 +69,7 @@ model {
 
             evSafe   = pow(0.01, RiskAversion[i]);
 
-            evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] * n_shocks + 0.1);
+            evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] * n_shocks + 1);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
 
@@ -92,7 +92,7 @@ generated quantities {
 
     mu_RiskAversion = Phi_approx(mu_p[1]) * 5;
     mu_PainAvoidance = Phi_approx(mu_p[2:4]) * 5;
-    mu_tau = Phi_approx(mu_p[5]) * 5;
+    mu_tau = Phi_approx(mu_p[5]) * 20;
 
 
     // Set all posterior predictions to 0 (avoids NULL values)
@@ -104,8 +104,8 @@ generated quantities {
 
     { // local section, this saves time and space
         for (i in 1:N) {
-            log_lik[i] = 0;
             int n_shocks = 0; //remember to reset for each sequence of trial / subject
+            log_lik[i] = 0;
 
             for (t in 1:Tsubj[i]) {
                 real evSafe;    // evSafe, evGamble, pGamble can be a scalar to save memory and increase speed.
@@ -113,7 +113,7 @@ generated quantities {
                 real pGamble;
 
                 evSafe     = pow(0.01, RiskAversion[i]);
-                evGamble   = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] * n_shocks + 0.1);
+                evGamble   = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] * n_shocks + 1);
                 pGamble    = inv_logit(tau[i] * (evGamble - evSafe));
                 log_lik[i] += bernoulli_lpmf(ResponseType[i, t] | pGamble);
 

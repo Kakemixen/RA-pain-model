@@ -29,6 +29,7 @@ parameters {
     matrix[N, 3] PainAvoidance_pr;
 }
 transformed parameters {
+    real fixed_tau = 12;
     vector<lower=0, upper=5>[N] RiskAversion;
     matrix<lower=0, upper=5>[N, 3] PainAvoidance;
 
@@ -65,7 +66,7 @@ model {
 
             evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 1);
 
-            pGamble  = inv_logit(10 * (evGamble - evSafe));
+            pGamble  = inv_logit(fixed_tau * (evGamble - evSafe));
 
             ResponseType[i,t] ~ bernoulli(pGamble);
 
@@ -105,7 +106,7 @@ generated quantities {
 
                 evSafe     = pow(0.01, RiskAversion[i]);
                 evGamble   = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 1);
-                pGamble    = inv_logit(10*(evGamble - evSafe));
+                pGamble    = inv_logit(fixed_tau * (evGamble - evSafe));
                 log_lik[i] += bernoulli_lpmf(ResponseType[i, t] | pGamble);
 
                 // generate posterior prediction for current trial

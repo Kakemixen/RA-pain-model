@@ -2,7 +2,7 @@ library(ggplot2)
 
 # Set up the vectors
 true_gambling <- c("tSafe", "tGamble")
-prediction <- c("pSafe","pGamble")
+2rediction <- c("pSafe","pGamble")
 
 # Create the data frame
 df <- expand.grid(true_gambling, prediction)
