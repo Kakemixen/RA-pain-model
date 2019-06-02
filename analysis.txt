@@ -19,9 +19,6 @@ At this point it is worth noting that most subjects have a strong preference for
 
 
 
-
-
-
  - cont_h_noT
 T = 12
 seems good
@@ -34,7 +31,6 @@ then very high uncertainty for high risk.
 RiskAversion is predicted as more or less the same for each candidate.
 
 PPC: 1882+449 correct, 937+411 wrong -> 0.633 ration correct
-
 
 
 

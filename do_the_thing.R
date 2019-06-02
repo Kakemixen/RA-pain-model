@@ -29,7 +29,7 @@ pow_i
 
 "
 
-model_name = "lin_h"
+model_name = "const_h"
 print("model")
 print(model_name)
 
