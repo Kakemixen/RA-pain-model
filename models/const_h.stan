@@ -55,8 +55,6 @@ model {
 
     // model calculation
     for (i in 1:N){
-    // counting shocks
-    int n_shocks = 0; //remember to reset for each sequence of trial / subject
 
         for (t in 1:Tsubj[i]) {
 
@@ -73,9 +71,6 @@ model {
 
             ResponseType[i,t] ~ bernoulli(pGamble);
 
-            // update shocks, RL?
-            if(ResponseType[i,t] == 1)
-                n_shocks += Shock[i,t];
         }
     }
 }

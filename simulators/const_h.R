@@ -10,16 +10,32 @@ set.seed(seed)   # always set a seed number for this homework!
 
 # True parameters
 simul_pars <- data.frame(subjID  = 1:num_subjs,
-                         alpha = rnorm(num_subjs, 0.20, 0.08),
-                         beta = rnorm(num_subjs, 2.00, 0.70))
+                         RiskAversion = rnorm(num_subjs, 0.50, 0.08),
+                         PainAvoidance_low = rnorm(num_subjs, 0.10, 0.20),
+                         PainAvoidance_med = rnorm(num_subjs, 0.50, 0.30),
+                         PainAvoidance_high = rnorm(num_subjs, 0.90, 0.40),
+                         tau = rnorm(num_subjs, 10.00, 4.0))
+
+# read the data file | because we'll just use the presented conditions cus they are equally devided
+dat_1 = read.table("../data/AllSubjectsProcessed.tsv", header=T, sep="\t")
+setting = data.frame(Trial = dat_1$Trial,
+                     RiskType = dat_1$RiskType,
+                     RewardType = dat_1$RewardType,
+                     ResponseType = dat_1$ResponseType,
+                     Reward = dat_1$Reward,
+                     Shock = dat_1$Shock,
+                     SubjID = dat_1$SubjID)
 
 # For storing simulated choice data for all subjects
 all_data <- NULL
 
 for (i in 1:num_subjs) {
   # Individual-level (i.e. per subject) parameter values
-  alpha <- simul_pars$alpha[i]
-  beta <- simul_pars$beta[i]
+  RiskAversion <- simul_pars$RiskAversion[i]
+  PainAvoidance_low <- simul_pars$PainAvoidance_low[i]
+  PainAvoidance_med <- simul_pars$PainAvoidance_med[i]
+  PainAvoidance_high <- simul_pars$PainAvoidance_high[i]
+  tau <- simul_pars$tau[i]
 
   # geneate payoff structure for each subject
   # Defaults for the two options
@@ -62,10 +78,13 @@ for (i in 1:num_subjs) {
     sv[choice] = sv[choice] + alpha * (outcome - sv[choice] )
 
     # append simulated task/response to subject data
-    tmp_data[t, "subjID"] = i
-    tmp_data[t, "trial"] = t
-    tmp_data[t, "choice"] = choice
-    tmp_data[t, "outcome"] = outcome
+    tmp_data[t, "SubjID"] = i
+    tmp_data[t, "Trial"] = t
+    tmp_data[t, "ResponseType"] = choice
+    tmp_data[t, "RewardType"] = outcome
+    tmp_data[t, "RiskType"] = outcome
+    tmp_data[t, "Reward"] = outcome
+    tmp_data[t, "Shock"] = outcome
   } # end of t loop
   # Append current subject with all subjects' data
   all_data = rbind(all_data, tmp_data)
