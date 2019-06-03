@@ -67,8 +67,13 @@ get_dataList <- function(){
     return(dataList)
 }
 
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
 
 PPC <- function(output, dataList, samples){
+    print("running PPC")
     pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
     params = rstan::extract(output)
 
@@ -83,7 +88,7 @@ PPC <- function(output, dataList, samples){
         pred_values <- c(0,0, # S
                          0,0) # G
         for(i in 1:dataList$Tsubj[n]){
-            yPred <- params$PredictedResponse[samples,n,i] #TODO change to majority label
+            yPred <- getmode(params$PredictedResponse[,n,i])
             yTrue <- dataList$ResponseType[n,i]
             index = yPred*2 + yTrue + 1
             pred_values[index] = pred_values[index] + 1
@@ -107,6 +112,5 @@ PPC <- function(output, dataList, samples){
         theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("All Subjects")) +
         scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
     print(g)
-    return(g)
 }
 
