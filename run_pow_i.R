@@ -2,7 +2,7 @@ source("./general.R")
 library(ggplot2)
 library(rstan)
 
-model_name = "const_i"
+model_name = "pow_i"
 print("running model")
 print(model_name)
 
@@ -22,6 +22,7 @@ PPC(output, dataList, iterations-warmups)
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
 traceplot(output, pars=c("RiskAversion"))
 traceplot(output, pars=c("PainAvoidance"))
+traceplot(output, pars=c("PainRetention"))
 traceplot(output, pars=c("tau"))
 
 
@@ -29,5 +30,6 @@ traceplot(output, pars=c("tau"))
 pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
 stan_plot(output, pars=c("RiskAversion"))
 stan_plot(output, pars=c("PainAvoidance"))
+stan_plot(output, pars=c("PainRetention"))
 stan_plot(output, pars=c("tau"))
 

@@ -2,7 +2,7 @@ source("./general.R")
 library(ggplot2)
 library(rstan)
 
-model_name = "const_i"
+model_name = "exp_i"
 print("running model")
 print(model_name)
 
