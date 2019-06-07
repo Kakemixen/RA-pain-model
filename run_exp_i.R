@@ -16,7 +16,7 @@ dataList = get_dataList()
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
-PPC(output, dataList, iterations-warmups)
+PPC(output, dataList)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))

@@ -1,6 +1,7 @@
 # Programmed by Erling Ljunggren, cus that's important to know.
 
 library(rstan)
+library(loo)
 library(ggplot2)
 rstan_options(auto_write = TRUE)
 
@@ -72,7 +73,7 @@ getmode <- function(v) {
    uniqv[which.max(tabulate(match(v, uniqv)))]
 }
 
-PPC <- function(output, dataList, samples){
+PPC <- function(output, dataList){
     print("running PPC")
     pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
     params = rstan::extract(output)
@@ -114,3 +115,33 @@ PPC <- function(output, dataList, samples){
     print(g)
 }
 
+getBIC <- function(ll, num_params, samples){
+   (-2) * mean(ll) + log(samples) * num_params
+}
+
+BIC <- function(output, dataList, num_params, samples){
+    formula = "ln(n)k -2ln(L)"
+    print("running BIC")
+    pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
+    params = rstan::extract(output)
+    individ_BIC = rep(0, dataList$N)
+    for(n in 1:dataList$N){
+        individ_BIC[n] = getBIC(params$log_lik, num_params, samples)
+    }
+    df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$N)
+    g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste("BIC per subject | total BIC:", sum(individ_BIC)))
+    print(g)
+}
+
+LOOIC <- function(output){
+    # Extract pointwise log-likelihood and compute LOO
+    log_lik <- extract_log_lik(output, merge_chains = FALSE)
+
+    # as of loo v2.0.0 we can optionally provide relative effective sample sizes
+    # when calling loo, which allows for better estimates of the PSIS effective
+    # sample sizes and Monte Carlo error
+    r_eff <- relative_eff(exp(log_lik))
+
+    looic <- loo(log_lik, r_eff = r_eff, cores = 2)
+    print(looic)
+}

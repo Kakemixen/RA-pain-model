@@ -8,7 +8,7 @@ print(model_name)
 
 iterations = 2000
 warmups = 1000
-chains = 1
+chains = 4
 
 # get pars vector
 paramList = c("RiskAversion","PainAvoidance","tau","mu_p", "sigma_p", "mu_RiskAversion","mu_PainAvoidance","mu_tau","log_lik","PredictedResponse")
@@ -16,7 +16,8 @@ dataList = get_dataList()
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
-PPC(output, dataList, iterations-warmups)
+BIC(output, dataList, 5, iterations-warmups)
+PPC(output, dataList)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
@@ -34,3 +35,4 @@ stan_plot(output, pars=c("tau"))
 stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 
+LOOIC(output)

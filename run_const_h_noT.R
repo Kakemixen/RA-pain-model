@@ -2,13 +2,13 @@ source("./general.R")
 library(ggplot2)
 library(rstan)
 
-model_name = "const_h"
+model_name = "const_h_noT"
 print("running model")
 print(model_name)
 
 iterations = 2000
 warmups = 1000
-chains = 1
+chains = 4
 
 # get pars vector
 paramList = c("RiskAversion","PainAvoidance","mu_p", "sigma_p", "mu_RiskAversion","mu_PainAvoidance","log_lik","PredictedResponse")
@@ -16,7 +16,8 @@ dataList = get_dataList()
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
-PPC(output, dataList, iterations-warmups)
+BIC(output, dataList, 4, iterations-warmups)
+PPC(output, dataList)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
