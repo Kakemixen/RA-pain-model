@@ -2,19 +2,22 @@
 
 library(rstan)
 library(loo)
+
 library(ggplot2)
+library(gridExtra)
+library(grid)
+library(gtable)
 rstan_options(auto_write = TRUE)
 
 # set seed
 set.seed(21111996) # such eggs of easter ^^
 
-sample_model <- function(model_name, dataList, paramList, iterations, warmups, chains){
+sample_model <- function(model_name, dataList, paramList, iterations, warmups, chains, init="random"){
     # run!
     if (!file.exists(paste("./stanfits/", model_name, ".rds",sep=""))){
         print("fitting stan model")
         output = stan(paste("./models/", model_name, ".stan", sep=""),
-              data = dataList,
-              pars = paramList,
+              data = dataList, pars = paramList, init=init,
               iter = iterations, warmup=warmups, chains=chains, cores=chains)
         saveRDS(output, paste("./stanfits/", model_name, ".rds",sep=""))
     } else {
@@ -102,7 +105,7 @@ PPC <- function(output, dataList){
 
         #Plot the Data
         g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("green", "red", "red", "green")) +
-            theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("Subject:",n)) +
+            theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste(model_name, "- Subject:",n)) +
             scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
         print(g)
     }
@@ -110,7 +113,7 @@ PPC <- function(output, dataList){
     df <- expand.grid(true_gambling, prediction)
     df$value <- total_values
     g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("green", "red", "red", "green")) +
-        theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("All Subjects")) +
+        theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste(model_name,"- All Subjects")) +
         scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
     print(g)
 }
@@ -120,7 +123,6 @@ getBIC <- function(ll, num_params, samples){
 }
 
 BIC <- function(output, dataList, num_params, samples){
-    formula = "ln(n)k -2ln(L)"
     print("running BIC")
     pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
     params = rstan::extract(output)
@@ -129,11 +131,13 @@ BIC <- function(output, dataList, num_params, samples){
         individ_BIC[n] = getBIC(params$log_lik, num_params, samples)
     }
     df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$N)
-    g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste("BIC per subject | total BIC:", sum(individ_BIC)))
+    g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))
     print(g)
 }
 
 LOOIC <- function(output){
+    print("running LOOIC")
+    pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""))
     # Extract pointwise log-likelihood and compute LOO
     log_lik <- extract_log_lik(output, merge_chains = FALSE)
 
@@ -142,6 +146,17 @@ LOOIC <- function(output){
     # sample sizes and Monte Carlo error
     r_eff <- relative_eff(exp(log_lik))
 
-    looic <- loo(log_lik, r_eff = r_eff, cores = 2)
-    print(looic)
+    looic <- loo::loo(log_lik, r_eff = r_eff, cores = 2)
+
+    table <- tableGrob(looic$estimates)
+    title <- textGrob(paste(model_name, "- LOOIC"), gp = gpar(fontsize = 20))
+    padding <- unit(0.5,"line")
+    table <- gtable_add_rows(
+      table, heights = grobHeight(title) + padding, pos = 0
+    )
+    table <- gtable_add_grob(
+      table, list(title),
+      t = 1, l = 1, r = ncol(table)
+    )
+    grid.draw(table)
 }

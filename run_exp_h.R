@@ -8,13 +8,28 @@ print(model_name)
 
 iterations = 2000
 warmups = 1000
-chains = 4
+chains = 2
 
 # get pars vector
 paramList = c("RiskAversion","PainAvoidance","PainRetention","tau","mu_p", "sigma_p", "mu_RiskAversion","mu_PainAvoidance","mu_PainRetention","mu_tau","log_lik","PredictedResponse")
 dataList = get_dataList()
 
-output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
+output = sample_model(model_name, dataList, paramList, iterations, warmups, chains, init=
+                      list(
+                          chain_1 = list(
+                               "PainRetention_pr"       = rep(-1, 35)
+                                ),
+                          chain_2 = list(
+                               "PainRetention_pr"       = rep(0, 35)
+                                )
+                          # chain_3 = list(
+                          #      "PainRetention_pr"       = rep(-1, 35)
+                          #       ),
+                          # chain_4 = list(
+                          #      "PainRetention_pr"       = rep(-1, 35)
+                          #       ),
+                      )
+)
 
 BIC(output, dataList, 6, iterations-warmups)
 PPC(output, dataList)
@@ -37,3 +52,4 @@ stan_plot(output, pars=c("tau"))
 stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance","mu_PainRetention","mu_tau"))
 stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance","mu_PainRetention","mu_tau"))
 
+LOOIC(output)

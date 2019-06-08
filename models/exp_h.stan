@@ -33,18 +33,18 @@ parameters {
     vector[N] tau_pr;
 }
 transformed parameters {
-    vector<lower=0, upper=5>[N] RiskAversion;
-    matrix<lower=0, upper=5>[N, 3] PainAvoidance;
-    vector<lower=0, upper=5>[N] PainRetention;
+    vector<lower=0, upper=3>[N] RiskAversion;
+    matrix<lower=0, upper=3>[N, 3] PainAvoidance;
+    vector<lower=0, upper=2>[N] PainRetention;
     vector<lower=0, upper=20>[N] tau;
 
     for(i in 1:N){
-        RiskAversion[i] = Phi_approx( mu_p[1] + sigma_p[1] * RiskAversion_pr[i] ) * 5;
+        RiskAversion[i] = Phi_approx( mu_p[1] + sigma_p[1] * RiskAversion_pr[i] ) * 3;
         //Pain avoidance is matrix
         for (j in 1:3){
-            PainAvoidance[i,j] = Phi_approx( mu_p[j+1] + sigma_p[j+1] * PainAvoidance_pr[i,j] ) * 5;
+            PainAvoidance[i,j] = Phi_approx( mu_p[j+1] + sigma_p[j+1] * PainAvoidance_pr[i,j] ) * 3;
         }
-        PainRetention[i] = Phi_approx( mu_p[5] + sigma_p[5] * PainRetention_pr[i] ) * 5;
+        PainRetention[i] = Phi_approx( mu_p[5] + sigma_p[5] * PainRetention_pr[i] ) * 2;
         tau[i] = Phi_approx( mu_p[6] + sigma_p[6] * tau_pr[i] ) * 20;
     }
 }
@@ -96,9 +96,9 @@ generated quantities {
     real PredictedResponse[N, T];
     real log_lik[N];
 
-    mu_RiskAversion = Phi_approx(mu_p[1]) * 5;
-    mu_PainAvoidance = Phi_approx(mu_p[2:4]) * 5;
-    mu_PainRetention = Phi_approx(mu_p[5]) * 5;
+    mu_RiskAversion = Phi_approx(mu_p[1]) * 3;
+    mu_PainAvoidance = Phi_approx(mu_p[2:4]) * 3;
+    mu_PainRetention = Phi_approx(mu_p[5]) * 2;
     mu_tau = Phi_approx(mu_p[6]) * 20;
 
 
