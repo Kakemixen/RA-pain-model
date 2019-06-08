@@ -135,6 +135,19 @@ BIC <- function(output, dataList, num_params, samples){
     print(g)
 }
 
+chris_BIC <- function(output, dataList, num_params, samples){
+  print("running BIC")
+  pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
+  params = rstan::extract(output)
+  individ_BIC = rep(0, dataList$n_subj)
+  for(n in 1:dataList$n_subj){
+    individ_BIC[n] = getBIC(params$log_lik, num_params, samples)
+  }
+  df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$n_subj)
+  g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))
+  print(g)
+}
+
 LOOIC <- function(output){
     print("running LOOIC")
     pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""))
