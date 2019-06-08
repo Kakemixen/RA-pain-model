@@ -18,6 +18,7 @@ output = sample_model(model_name, dataList, paramList, iterations, warmups, chai
 
 BIC(output, dataList, 5, iterations-warmups)
 PPC(output, dataList)
+LOOIC(output)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
@@ -35,4 +36,3 @@ stan_plot(output, pars=c("tau"))
 stan_plot(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 stan_dens(output, pars=c("mu_RiskAversion", "mu_PainAvoidance", "mu_tau"))
 
-LOOIC(output)

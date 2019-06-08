@@ -17,19 +17,19 @@ dataList = get_dataList()
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
 BIC(output, dataList, 5, iterations-warmups)
-# PPC(output, dataList)
-#
-# ## traceplot
-# pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
-# traceplot(output, pars=c("RiskAversion"))
-# traceplot(output, pars=c("PainAvoidance"))
-# traceplot(output, pars=c("tau"))
-#
-#
-# # posterior plots
-# pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
-# stan_plot(output, pars=c("RiskAversion"))
-# stan_plot(output, pars=c("PainAvoidance"))
-# stan_plot(output, pars=c("tau"))
-
+PPC(output, dataList)
 LOOIC(output)
+
+## traceplot
+pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
+traceplot(output, pars=c("RiskAversion"))
+traceplot(output, pars=c("PainAvoidance"))
+traceplot(output, pars=c("tau"))
+
+
+# posterior plots
+pdf(paste("./plots/", model_name, "_posteriors.pdf", sep=""))
+stan_plot(output, pars=c("RiskAversion"))
+stan_plot(output, pars=c("PainAvoidance"))
+stan_plot(output, pars=c("tau"))
+
