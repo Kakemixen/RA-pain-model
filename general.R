@@ -150,7 +150,7 @@ chris_BIC <- function(output, dataList, num_params, samples){
 
 LOOIC <- function(output){
     print("running LOOIC")
-    pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""))
+    pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""), height=2, width=4.5)
     # Extract pointwise log-likelihood and compute LOO
     log_lik <- extract_log_lik(output, merge_chains = FALSE)
 
@@ -179,13 +179,13 @@ PPC_chris <- function(output, dataList, samples){
   print("running PPC")
   #pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
   params = rstan::extract(output)
-  
+
   # Set up the vectors
   true_gambling <- c("tSafe", "tGamble")
   prediction <- c("pSafe","pGamble")
-  
+
   total_values <- c(0,0,0,0)
-  
+
   for(n in 1:length(dataList$N)){
     #true: S, G  pred:
     pred_values <- c(0,0, # S
@@ -196,11 +196,11 @@ PPC_chris <- function(output, dataList, samples){
     index = yPred*2 + yTrue + 1
     pred_values[index] = pred_values[index] + 1
     total_values = total_values + pred_values
-    
+
     # Create the data frame
     df <- expand.grid(true_gambling, prediction)
     df$value <- pred_values
-    
+
     #Plot the Data
     #g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = c("green", "red", "red", "green")) +
     #  theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("Subject:",n)) +
@@ -219,10 +219,10 @@ PPC_chris <- function(output, dataList, samples){
 get_chris_dataList <- function(){
   dat_1 = read.table("./data/AllSubjectsProcessed.tsv", header=T, sep="\t")
   allSubjs = unique(dat_1$SubjID)  # all subject IDs
-  N = length(allSubjs)  
+  N = length(allSubjs)
   T = 108
-  
-  
+
+
   Reward = array(0, c(N,T))
   ZScore = array(0, c(N,T))
   Tsubj = array(0, c(N))
@@ -241,16 +241,16 @@ get_chris_dataList <- function(){
     subjdat = subset(dat_1, SubjID == dat_1$SubjID[n])
     X = c(X, list(c(1, as.integer(dat_1$RiskType[n] == 2), as.integer(dat_1$RiskType[n] == 3), (dat_1$Reward[n] - mean(subjdat$Reward)) / sd(subjdat$Reward))))
   }
-  
+
   for (n in 1:length(dat_1$SubjID)){
     if(dat_1$SubjID[n] > 14){
       dat_1$SubjID[n] = dat_1$SubjID[n] - 1
-    } 
+    }
   }
-  
-  
+
+
   dataList2 = get_dataList()
-  
+
   dataList <- list(
     n_obs       = length(dat_1$SubjID),
     n_pred       = 4,
@@ -258,15 +258,15 @@ get_chris_dataList <- function(){
     N = dat_1$ResponseType,
     X = X,
     ix = dat_1$SubjID
-    
+
     #RiskType = dataList2$RiskType,
     #RewardType = dataList2$RewardType,
     #ResponseType =  dataList2$ResponseType,
     #Shock = dataList2$Shock,
     #Reward = Reward,
     #ZScore = ZScore
-    
+
   )
   return(dataList)
 }
-  
+

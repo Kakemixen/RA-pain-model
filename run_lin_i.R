@@ -8,7 +8,7 @@ print(model_name)
 
 iterations = 2000
 warmups = 1000
-chains = 1
+chains = 4
 
 # get pars vector
 paramList = c("RiskAversion","PainAvoidance","tau","log_lik","PredictedResponse")
@@ -16,7 +16,9 @@ dataList = get_dataList()
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
+BIC(output, dataList, 5, iterations-warmups)
 PPC(output, dataList)
+LOOIC(output)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))
