@@ -11,7 +11,7 @@ warmups = 1000
 chains = 2
 
 # get pars vector
-paramList = c("beta_mu","theta", "ddb", "PointPosteriors", "PredictedResponse")
+paramList = c("beta_mu","theta", "ddb", "PointPosteriors", "PredictedResponse", "log_lik")
 dataList = get_chris_dataList()
 
 
@@ -20,7 +20,8 @@ output = sample_model(model_name, dataList, paramList, iterations, warmups, chai
 #parameters <- rstan::extract(output)
 
 
-PPC_chris(output, dataList, iterations-warmups)
+chris_BIC(output, dataList, 1, iterations-warmups)
+LOOIC(output)
 
 ## traceplot
 pdf(paste("./plots/", model_name, "_traceplot.pdf", sep=""))

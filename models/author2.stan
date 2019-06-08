@@ -58,11 +58,17 @@ generated quantities {
     vector[n_obs] ddb; 
     vector[n_obs] PointPosteriors; // vector for computing log pointwise predictive density
     vector[n_obs] PredictedResponse;
+    real log_lik[n_subj];
+    
+    for (i in 1:n_subj) {
+      log_lik[i] = 0;
+    }
     
     for (n in 1:n_obs){
         theta[n] = inv_logit( dot_product( X[n], beta[ix[n]] ) );
         ddb[n] = 0.25 - (theta[n]-0.5)^2;
         PointPosteriors[n] = exp( bernoulli_log( N[n], theta[n] ) );
         PredictedResponse[n] = bernoulli_rng(theta[n]);
+        log_lik[ix[n]] += bernoulli_lpmf(N[n] | theta[n]);
     }
 }

@@ -11,13 +11,16 @@ warmups = 1000
 chains = 2
 
 # get pars vector
-paramList = c("beta_mu", "beta", "beta_sig", "theta", "ddb", "PointPosteriors", "PredictedResponse")
+paramList = c("beta_mu", "beta", "beta_sig", "theta", "ddb", "PointPosteriors", "PredictedResponse", "log_lik")
 dataList = get_chris_dataList()
 
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
 #parameters <- rstan::extract(output)
+chris_BIC(output, dataList, 3, iterations-warmups)
+LOOIC(output)
+
 
 
 PPC_chris(output, dataList, iterations-warmups)
