@@ -116,6 +116,8 @@ PPC <- function(output, dataList){
         theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste(model_name,"- All Subjects")) +
         scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
     print(g)
+    print((df[1,3] + df[4,3] ) / sum(df[,3]))
+    
 }
 
 getBIC <- function(ll, num_params, samples){
@@ -128,7 +130,7 @@ BIC <- function(output, dataList, num_params){
     params = rstan::extract(output)
     individ_BIC = rep(0, dataList$N)
     for(n in 1:dataList$N){
-        individ_BIC[n] = getBIC(params$log_lik, num_params, dataList$Tsubj[n])
+        individ_BIC[n] = getBIC(params$log_lik[,n], num_params, dataList$Tsubj[n])
     }
     df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$N)
     g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))
@@ -141,7 +143,7 @@ chris_BIC <- function(output, dataList, num_params){
   params = rstan::extract(output)
   individ_BIC = rep(0, dataList$n_subj)
   for(n in 1:dataList$n_subj){
-    individ_BIC[n] = getBIC(params$log_lik[n], num_params, length(dataList$ix[dataList$ix == n]))
+    individ_BIC[n] = getBIC(params$log_lik[,n], num_params, length(dataList$ix[dataList$ix == n]))
   }
   df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$n_subj)
   g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))
@@ -214,6 +216,7 @@ PPC_chris <- function(output, dataList, samples){
     theme(legend.position="none") + xlab("") + ylab("") + ggtitle(paste("All Subjects")) +
     scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
   print(g)
+  print((df[1,3] + df[4,3] ) / sum(df[,3]))
 }
 
 get_chris_dataList <- function(){
