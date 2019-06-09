@@ -58,4 +58,5 @@ generated quantities {
         PredictedResponse[n] = bernoulli_rng(theta[n]);
         log_lik[ix[n]] += bernoulli_lpmf(N[n] | theta[n]);
     }
+}
 

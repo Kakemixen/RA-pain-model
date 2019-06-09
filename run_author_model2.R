@@ -8,7 +8,7 @@ print(model_name)
 
 iterations = 2000
 warmups = 1000
-chains = 2
+chains = 4
 
 # get pars vector
 paramList = c("beta_mu", "beta", "beta_sig", "theta", "ddb", "PointPosteriors", "PredictedResponse", "log_lik")
