@@ -280,8 +280,8 @@ compare_PA <- function(output){
     PainAvoidance_med = reshape::melt(PainAvoidance_med)
     PainAvoidance_hig = data.frame(parameters$PainAvoidance[,,3])
     PainAvoidance_hig = reshape::melt(PainAvoidance_hig)
-    low <- ggplot(PainAvoidance_low, aes(x=value, color=variable)) + geom_density() + ggtitle("low risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
-    med <- ggplot(PainAvoidance_med, aes(x=value, color=variable)) + geom_density() + ggtitle("medium risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
-    hig <- ggplot(PainAvoidance_hig, aes(x=value, color=variable)) + geom_density() + ggtitle("high risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
+    low <- ggplot(PainAvoidance_low, aes(x=value, color=variable)) + geom_density() + geom_vline(aes(xintercept=mean(value))) + ggtitle("low risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,4))
+    med <- ggplot(PainAvoidance_med, aes(x=value, color=variable)) + geom_density() + geom_vline(aes(xintercept=mean(value))) + ggtitle("medium risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,4))
+    hig <- ggplot(PainAvoidance_hig, aes(x=value, color=variable)) + geom_density() + geom_vline(aes(xintercept=mean(value))) + ggtitle("high risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,4))
     grid.arrange(low,med,hig, ncol=1)
 }
