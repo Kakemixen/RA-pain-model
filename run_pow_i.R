@@ -14,21 +14,21 @@ chains = 4
 paramList = c("RiskAversion","PainAvoidance","PainRetention","tau","log_lik","PredictedResponse")
 dataList = get_dataList()
 
-output = sample_model(model_name, dataList, paramList, iterations, warmups, chains, init= list(
-                          chain_1 = list(
-                               "PainRetention"       = rep(1, 35)
-                                ),
-                          chain_2 = list(
-                               "PainRetention"       = rep(3.1, 35)
-                                ),
-                          chain_3 = list(
-                               "PainRetention"       = rep(2, 35)
-                                ),
-                          chain_4 = list(
-                               "PainRetention"       = rep(0.5, 35)
-                                )
-                      )
-)
+#output = sample_model(model_name, dataList, paramList, iterations, warmups, chains, init= list(
+#                          chain_1 = list(
+#                               "PainRetention"       = rep(1, 35)
+#                                ),
+#                          chain_2 = list(
+#                               "PainRetention"       = rep(3.1, 35)
+#                                ),
+#                          chain_3 = list(
+#                               "PainRetention"       = rep(2, 35)
+#                                ),
+#                          chain_4 = list(
+#                               "PainRetention"       = rep(0.5, 35)
+#                                )
+#                      )
+#)
 
 BIC(output, dataList, 6)
 PPC(output, dataList)
