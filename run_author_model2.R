@@ -18,7 +18,7 @@ dataList = get_chris_dataList()
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
 #parameters <- rstan::extract(output)
-chris_BIC(output, dataList, 4, iterations-warmups)
+chris_BIC(output, dataList, 4)
 LOOIC(output)
 
 
