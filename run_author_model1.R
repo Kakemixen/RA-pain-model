@@ -20,7 +20,7 @@ output = sample_model(model_name, dataList, paramList, iterations, warmups, chai
 #parameters <- rstan::extract(output)
 
 
-chris_BIC(output, dataList, 1, iterations-warmups)
+chris_BIC(output, dataList, 1)
 LOOIC(output)
 
 ## traceplot

@@ -30,7 +30,7 @@ output = sample_model(model_name, dataList, paramList, iterations, warmups, chai
                       )
 )
 
-BIC(output, dataList, 6, iterations-warmups)
+BIC(output, dataList, 6)
 PPC(output, dataList)
 LOOIC(output)
 

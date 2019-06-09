@@ -122,26 +122,26 @@ getBIC <- function(ll, num_params, samples){
    (-2) * mean(ll) + log(samples) * num_params
 }
 
-BIC <- function(output, dataList, num_params, samples){
+BIC <- function(output, dataList, num_params){
     print("running BIC")
     pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
     params = rstan::extract(output)
     individ_BIC = rep(0, dataList$N)
     for(n in 1:dataList$N){
-        individ_BIC[n] = getBIC(params$log_lik, num_params, samples)
+        individ_BIC[n] = getBIC(params$log_lik, num_params, dataList$Tsubj[n])
     }
     df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$N)
     g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))
     print(g)
 }
 
-chris_BIC <- function(output, dataList, num_params, samples){
+chris_BIC <- function(output, dataList, num_params){
   print("running BIC")
   pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
   params = rstan::extract(output)
   individ_BIC = rep(0, dataList$n_subj)
   for(n in 1:dataList$n_subj){
-    individ_BIC[n] = getBIC(params$log_lik[n], num_params, samples)
+    individ_BIC[n] = getBIC(params$log_lik[n], num_params, length(dataList$ix[dataList$ix == n]))
   }
   df_individ_BIC = data.frame(BIC = individ_BIC, id = 1:dataList$n_subj)
   g <- ggplot(data = df_individ_BIC, mapping = aes(x=id, y=BIC)) + geom_point() + ggtitle(paste(model_name, "- BIC per subject | total BIC:", sum(individ_BIC)))

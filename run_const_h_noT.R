@@ -16,7 +16,7 @@ dataList = get_dataList()
 
 output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
-BIC(output, dataList, 4, iterations-warmups)
+BIC(output, dataList, 4)
 PPC(output, dataList)
 LOOIC(output)
 
