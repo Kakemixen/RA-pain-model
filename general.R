@@ -270,3 +270,18 @@ get_chris_dataList <- function(){
   return(dataList)
 }
 
+compare_PA <- function(output){
+    print("comparing PA")
+    pdf(paste("./plots/", model_name, "_comparison_PA.pdf", sep=""))
+    parameters = extract(output)
+    PainAvoidance_low = data.frame(parameters$PainAvoidance[,,1])
+    PainAvoidance_low = reshape::melt(PainAvoidance_low)
+    PainAvoidance_med = data.frame(parameters$PainAvoidance[,,2])
+    PainAvoidance_med = reshape::melt(PainAvoidance_med)
+    PainAvoidance_hig = data.frame(parameters$PainAvoidance[,,3])
+    PainAvoidance_hig = reshape::melt(PainAvoidance_hig)
+    low <- ggplot(PainAvoidance_low, aes(x=value, color=variable)) + geom_density() + ggtitle("low risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
+    med <- ggplot(PainAvoidance_med, aes(x=value, color=variable)) + geom_density() + ggtitle("medium risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
+    hig <- ggplot(PainAvoidance_hig, aes(x=value, color=variable)) + geom_density() + ggtitle("high risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,5))
+    grid.arrange(low,med,hig, ncol=1)
+}
