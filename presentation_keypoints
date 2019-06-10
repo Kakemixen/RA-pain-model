@@ -1,0 +1,46 @@
+        script
+Intro
+    our goal:
+        implementing model for authors hypothesis
+        creating own hypothesis and compare to author's
+            maximizing likelihood for our hypothesis -> create best model
+Problem/experiment
+    pain vs money
+describe:
+    authors models | Aversion-Reward Conflic
+        theory: deviation from mean reward predicts response
+    our models | Risk Aversion
+        theory: standard RA-model with modification for pain instead of loss
+choosing our best model:
+    describe how we ended up with const_h_noT
+    that means: why no other?
+    exp and pow -> const => chose const model
+        needed to initialize those extra parameters manually
+    no_T performs similarly
+    - experienceof pain doesn't change
+    future: savage dickey
+comparing our best model with author's models:
+    BIC similar + LOOIC/PPC different: | our const_h and author model2
+        hover around the same mode, but different confidence in prediction
+    loss is qualitatively a different thing, so perhaps standard RA-model is not best
+
+
+include for things
+result:
+    present posteriors
+present:
+    BIC
+    LOOIC
+    PPC
+    Parameter - Recovery if Done else Drop
+analyse/conlclude:
+    exp -> const => chose const model
+    no_T performs similarly
+    BIC similar + LOOIC/PPC different: | our const_h and author model2
+        hover around the same mode, but different confidence in prediction
+    loss is qualitatively a different thing, so perhaps standard RA-model is not best
+future:
+    Parameter recovery if not Done
+    Savage Dickey
+
+

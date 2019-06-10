@@ -27,9 +27,9 @@ sample_model <- function(model_name, dataList, paramList, iterations, warmups, c
     return(output)
 }
 
-get_dataList <- function(){
+get_dataList <- function(path="./data/AllSubjectsProcessed.tsv"){
     # read the data file
-    dat_1 = read.table("./data/AllSubjectsProcessed.tsv", header=T, sep="\t")
+    dat_1 = read.table(path, header=T, sep="\t")
 
     allSubjs = unique(dat_1$SubjID)  # all subject IDs
     N = length(allSubjs)                   # number of subjects
@@ -272,7 +272,7 @@ get_chris_dataList <- function(){
 
 compare_PA <- function(output){
     print("comparing PA")
-    pdf(paste("./plots/", model_name, "_comparison_PA.pdf", sep=""))
+    png(paste("./plots/", model_name, "_comparison_PA.png", sep=""), width=900, height=900, res=150)
     parameters = extract(output)
     PainAvoidance_low = data.frame(parameters$PainAvoidance[,,1])
     PainAvoidance_low = reshape::melt(PainAvoidance_low)
@@ -284,4 +284,58 @@ compare_PA <- function(output){
     med <- ggplot(PainAvoidance_med, aes(x=value, color=variable)) + geom_density() + geom_vline(aes(xintercept=mean(value))) + ggtitle("medium risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,4))
     hig <- ggplot(PainAvoidance_hig, aes(x=value, color=variable)) + geom_density() + geom_vline(aes(xintercept=mean(value))) + ggtitle("high risk") + theme(legend.position="none") + scale_x_continuous(limits=c(0,4))
     grid.arrange(low,med,hig, ncol=1)
+}
+
+parameter_recovery <- function(model_name, paramList, iterations, warmups, chains, init="random"){
+    dataList = get_dataList(path=paste("./simulators/simul_data_", model_name, ".txt", sep=""))
+
+    if (!file.exists(paste("./simulators/stanfits/", model_name, ".rds",sep=""))){
+        print("fitting stan model")
+        output = stan(paste("./models/", model_name, ".stan", sep=""),
+              data = dataList, pars = paramList, init=init,
+              iter = iterations, warmup=warmups, chains=chains, cores=chains)
+        saveRDS(output, paste("./simulators/stanfits/", model_name, ".rds",sep=""))
+    } else {
+        print("recovering stan model")
+        output = readRDS(paste("./simulators/stanfits/", model_name, ".rds",sep=""))
+    }
+    # extract Stan fit object (parameters)
+    parameters <- rstan::extract(output)
+
+    pdf(paste("./plots/", model_name, "_recovery.pdf", sep=""))
+    true_params = read.table(paste("./simulators/simul_param_", model_name, ".txt", sep=""), header=T, sep="\t")
+
+    RA_mean = apply(parameters$RiskAversion, 2, mean)
+    RA_sd = apply(parameters$RiskAversion, 2, sd)
+
+    # print(RA_mean)
+    # print(true_params$RiskAversion)
+    #
+    plot(true_params$RiskAversion, RA_mean,
+         xlab="true params", ylab="recovered params")
+    arrows(true_params$RiskAversion, RA_mean-RA_sd, true_params$RiskAversion, RA_mean+RA_sd, length=0.05, angle=90, code=3)
+    lines(c(0,5), c(0,5))
+
+    PA_l_mean = apply(parameters$PainAvoidance[,,1], 2, mean)
+    PA_l_sd = apply(parameters$PainAvoidance[,,1], 2, sd)
+    plot(true_params$PainAvoidance_low, PA_l_mean,
+         xlab="true params", ylab="recovered params")
+    arrows(true_params$PainAvoidance_low, PA_l_mean-PA_l_sd, true_params$PainAvoidance_low, PA_l_mean+PA_l_sd, length=0.05, angle=90, code=3)
+    lines(c(0,5), c(0,5))
+
+    PA_m_mean = apply(parameters$PainAvoidance[,,2], 2, mean)
+    PA_m_sd = apply(parameters$PainAvoidance[,,2], 2, sd)
+    plot(true_params$PainAvoidance_med, PA_m_mean,
+         xlab="true params", ylab="recovered params")
+    arrows(true_params$PainAvoidance_med, PA_m_mean-PA_m_sd, true_params$PainAvoidance_med, PA_m_mean+PA_m_sd, length=0.05, angle=90, code=3)
+    lines(c(0,5), c(0,5))
+
+    PA_h_mean = apply(parameters$PainAvoidance[,,3], 2, mean)
+    PA_h_sd = apply(parameters$PainAvoidance[,,3], 2, sd)
+    plot(true_params$PainAvoidance_high, PA_h_mean,
+         xlab="true params", ylab="recovered params")
+    arrows(true_params$PainAvoidance_high, PA_h_mean-PA_h_sd, true_params$PainAvoidance_high, PA_h_mean+PA_h_sd, length=0.05, angle=90, code=3)
+    lines(c(0,5), c(0,5))
+
+
 }
