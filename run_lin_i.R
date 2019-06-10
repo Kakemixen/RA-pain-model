@@ -14,7 +14,7 @@ chains = 4
 paramList = c("RiskAversion","PainAvoidance","tau","log_lik","PredictedResponse")
 dataList = get_dataList()
 
-output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
+#output = sample_model(model_name, dataList, paramList, iterations, warmups, chains)
 
 BIC(output, dataList, 5)
 PPC(output, dataList)
