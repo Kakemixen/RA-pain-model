@@ -78,7 +78,7 @@ getmode <- function(v) {
 
 PPC <- function(output, dataList){
     print("running PPC")
-    pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
+    #pdf(paste("./plots/", model_name, "_prediction.pdf", sep=""))
     params = rstan::extract(output)
 
     # Set up the vectors
@@ -126,7 +126,7 @@ getBIC <- function(ll, num_params, samples){
 
 BIC <- function(output, dataList, num_params){
     print("running BIC")
-    pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
+    #pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
     params = rstan::extract(output)
     individ_BIC = rep(0, dataList$N)
     for(n in 1:dataList$N){
@@ -139,7 +139,7 @@ BIC <- function(output, dataList, num_params){
 
 chris_BIC <- function(output, dataList, num_params){
   print("running BIC")
-  pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
+  #pdf(paste("./plots/", model_name, "_BIC.pdf", sep=""))
   params = rstan::extract(output)
   individ_BIC = rep(0, dataList$n_subj)
   for(n in 1:dataList$n_subj){
@@ -152,7 +152,7 @@ chris_BIC <- function(output, dataList, num_params){
 
 LOOIC <- function(output){
     print("running LOOIC")
-    pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""), height=2, width=4.5)
+    #pdf(paste("./plots/", model_name, "_LOOIC.pdf", sep=""), height=2, width=4.5)
     # Extract pointwise log-likelihood and compute LOO
     log_lik <- extract_log_lik(output, merge_chains = FALSE)
 
@@ -275,7 +275,7 @@ get_chris_dataList <- function(){
 
 compare_PA <- function(output){
     print("comparing PA")
-    png(paste("./plots/", model_name, "_comparison_PA.png", sep=""), width=900, height=900, res=150)
+    #png(paste("./plots/", model_name, "_comparison_PA.png", sep=""), width=900, height=900, res=150)
     parameters = extract(output)
     PainAvoidance_low = data.frame(parameters$PainAvoidance[,,1])
     PainAvoidance_low = reshape::melt(PainAvoidance_low)

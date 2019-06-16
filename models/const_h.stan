@@ -64,7 +64,7 @@ model {
             real pGamble;
 
             evSafe   = pow(0.01, RiskAversion[i]);
-
+            // Unlike RA, this is addititve. This is becaus, muliplying money by pain seems stupid
             evGamble = pow(RewardType[i,t]*0.33, RiskAversion[i]) - log( PainAvoidance[i,RiskType[i,t]] + 1);
 
             pGamble  = inv_logit(tau[i] * (evGamble - evSafe));
